@@ -11,6 +11,7 @@ const Container = styled.div`
   padding: 20px;
   width: 100%;
   overflow-y: auto;
+  background-color: ${({ theme }) => theme.bg_primary};
 `;
 
 const Title = styled.h1`
@@ -25,6 +26,10 @@ const Form = styled.form`
   gap: 20px;
   width: 100%;
   max-width: 600px;
+  background-color: ${({ theme }) => theme.bg_secondary};
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
 const Input = styled.input`
@@ -47,24 +52,36 @@ const Button = styled.button`
   }
 `;
 
-const Profile = () => {
+const ProfileImage = styled.img`
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 20px;
+`;
+
+const Label = styled.label`
+  font-size: 14px;
+  color: ${({ theme }) => theme.text_secondary || "#777"};
+`;
+
+const ProfilePage = () => {
   const dispatch = useDispatch();
   const currentUser = useSelector((state) => state.user.currentUser); // Get current user from Redux store
 
-  // Initial user details (can be fetched from an API or context)
   const [userDetails, setUserDetails] = useState({
     name: currentUser?.name || "",
     email: currentUser?.email || "",
     profilePicture: currentUser?.img || "https://via.placeholder.com/150",
   });
 
-  // Form data for updating details
   const [formData, setFormData] = useState({
-    profilePicture: "",
     oldPassword: "",
-    password: "",
+    newPassword: "",
     confirmPassword: "",
   });
+
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
@@ -85,7 +102,6 @@ const Profile = () => {
   };
 
   const handleProfileImageChange = async (e) => {
-    e.preventDefault();
     const file = e.target.files[0];
     if (!file) {
       alert("Please select a file");
@@ -96,53 +112,104 @@ const Profile = () => {
     formData.append("imageUrl", file);
 
     try {
-      await updateProfileImage(currentUser._id, formData);
+      setLoading(true);
+      const response = await updateProfileImage(currentUser._id, formData);
       alert("Profile image updated successfully!");
+      setUserDetails((prevDetails) => ({
+        ...prevDetails,
+        profilePicture: response.imageUrl,
+      }));
     } catch (error) {
       console.error("Error updating profile image:", error);
       alert("Error updating profile image");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handlePasswordChange = async (e) => {
-    e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
-    try {
-      await updatePassword(currentUser._id, { oldPassword: formData.oldPassword, newPassword: formData.password });
-      alert("Password updated successfully!");
-    } catch (error) {
-      console.error("Error updating password:", error);
-      alert("Error updating password");
-    }
-  };
-
-  const handlePersonalDetailsChange = async (e) => {
+  const handlePersonalDetailsSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updatePersonalDetails(currentUser._id, { name: userDetails.name, email: userDetails.email });
+      setLoading(true);
+      await updatePersonalDetails(currentUser._id, {
+        name: userDetails.name,
+        email: userDetails.email,
+      });
       alert("Personal details updated successfully!");
     } catch (error) {
       console.error("Error updating personal details:", error);
       alert("Error updating personal details");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (formData.newPassword !== formData.confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+    try {
+      setLoading(true);
+      await updatePassword(currentUser._id, {
+        oldPassword: formData.oldPassword,
+        newPassword: formData.newPassword,
+      });
+      alert("Password updated successfully!");
+    } catch (error) {
+      console.error("Error updating password:", error);
+      alert("Error updating password");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <Container>
-      <Title>Update Profile</Title>
-      <Form>
+      <Title>Profile Page</Title>
+      <ProfileImage
+        src={userDetails.profilePicture}
+        alt="Profile"
+        onError={(e) => (e.target.src = "https://via.placeholder.com/150")}
+      />
+      <Label htmlFor="profilePicture">Change Profile Picture</Label>
+      <Input
+        type="file"
+        id="profilePicture"
+        accept="image/*"
+        onChange={handleProfileImageChange}
+      />
+
+      {/* Personal Details Form */}
+      <Form onSubmit={handlePersonalDetailsSubmit}>
         <Input
-          type="file"
-          name="profilePicture"
-          onChange={handleProfileImageChange}
-          accept="image/*"
+          type="text"
+          name="name"
+          placeholder="Name"
+          value={userDetails.name}
+          onChange={(e) =>
+            setUserDetails((prev) => ({ ...prev, name: e.target.value }))
+          }
+          required
         />
-        <Button type="button" onClick={handleProfileImageChange}>Update Profile Picture</Button>
+        <Input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={userDetails.email}
+          onChange={(e) =>
+            setUserDetails((prev) => ({ ...prev, email: e.target.value }))
+          }
+          required
+        />
+        <Button type="submit" disabled={loading}>
+          {loading ? "Updating..." : "Update Personal Details"}
+        </Button>
       </Form>
-      <Form onSubmit={handlePasswordChange}>
+
+      {/* Password Update Form */}
+      <Form onSubmit={handlePasswordSubmit}>
         <Input
           type="password"
           name="oldPassword"
@@ -153,9 +220,9 @@ const Profile = () => {
         />
         <Input
           type="password"
-          name="password"
+          name="newPassword"
           placeholder="New Password"
-          value={formData.password}
+          value={formData.newPassword}
           onChange={handleChange}
           required
         />
@@ -167,29 +234,12 @@ const Profile = () => {
           onChange={handleChange}
           required
         />
-        <Button type="submit">Update Password</Button>
-      </Form>
-      <Form onSubmit={handlePersonalDetailsChange}>
-        <Input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={userDetails.name}
-          onChange={(e) => setUserDetails({ ...userDetails, name: e.target.value })}
-          required
-        />
-        <Input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={userDetails.email}
-          onChange={(e) => setUserDetails({ ...userDetails, email: e.target.value })}
-          required
-        />
-        <Button type="submit">Update Personal Details</Button>
+        <Button type="submit" disabled={loading}>
+          {loading ? "Updating..." : "Update Password"}
+        </Button>
       </Form>
     </Container>
   );
 };
 
-export default Profile;
+export default ProfilePage;

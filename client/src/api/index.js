@@ -75,35 +75,47 @@ export const deleteWorkout = async (token, workoutId) => {
   }
 };
 
-export const updateProfileImage = async (userId, data) => {
+export const updateProfileImage = async (token, userId, formData) => {
   try {
-    const response = await API.put(`/update-profile-image/${userId}`, data, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("fittrack-app-token")}` },
+    const response = await API.put(`/update-profile-image/${userId}`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
     });
     return response.data;
   } catch (error) {
+    console.error("Error updating profile image:", error.response?.data || error.message);
     throw error;
   }
 };
 
-export const updatePassword = async (userId, data) => {
+export const updatePassword = async (token, userId, passwords) => {
   try {
-    const response = await API.put(`/update-password/${userId}`, data, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("fittrack-app-token")}` },
+    const response = await API.put(`/update-password/${userId}`, passwords, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
     });
     return response.data;
   } catch (error) {
+    console.error("Error updating password:", error.response?.data || error.message);
     throw error;
   }
 };
 
-export const updatePersonalDetails = async (userId, data) => {
+export const updatePersonalDetails = async (token, userId, details) => {
   try {
-    const response = await API.put(`/update-personal-details/${userId}`, data, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("fittrack-app-token")}` },
+    const response = await API.put(`/update-personal-details/${userId}`, details, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
     });
     return response.data;
   } catch (error) {
+    console.error("Error updating personal details:", error.response?.data || error.message);
     throw error;
   }
 };

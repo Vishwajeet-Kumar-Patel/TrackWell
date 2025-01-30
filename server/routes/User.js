@@ -11,6 +11,7 @@ import {
   updatePersonalDetails,
   getWorkoutDates,
 } from "../controllers/User.js";
+import { upload } from "../utils/uploadImage.js";
 import { verifyToken } from "../middleware/verifyToken.js";
 
 const router = express.Router();
@@ -19,7 +20,7 @@ router.post("/signup", UserRegister);
 router.post("/signin", UserLogin);
 
 router.put('/update-password/:userId', verifyToken, updatePassword);
-router.put('/update-profile-image/:userId', verifyToken, updateProfileImage);
+router.put('/update-profile-image/:userId', verifyToken, upload.single('imageUrl'), updateProfileImage); // Use the upload middleware
 router.put('/update-personal-details/:userId', verifyToken, updatePersonalDetails);
 
 router.get("/dashboard", verifyToken, getUserDashboard);

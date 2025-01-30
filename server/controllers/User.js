@@ -5,6 +5,7 @@ import { createError } from "../error.js";
 import User from "../models/User.js";
 import Workout from "../models/Workout.js";
 import dayjs from "dayjs";
+import { uploadImage } from "../utils/uploadImage.js";
 
 dotenv.config();
 
@@ -60,21 +61,29 @@ export const updatePassword = async (req, res, next) => {
     const { userId } = req.params;
     const { oldPassword, newPassword } = req.body;
 
+    // Fetch user
     const user = await User.findById(userId);
     if (!user) return next(createError(404, "User not found"));
 
-    const isPasswordCorrect = await bcrypt.compare(oldPassword, user.password);
-    if (!isPasswordCorrect) return next(createError(400, "Incorrect old password"));
+    // Check old password
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return next(createError(400, "Old password is incorrect"));
+    }
 
+    // Hash new password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
+    
+    console.log("Hashed new password:", hashedPassword); // Debugging step
 
     user.password = hashedPassword;
+    user.markModified("password"); // Ensure password is recognized as modified
     await user.save();
 
     res.status(200).json({ message: "Password updated successfully" });
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(createError(500, error.message));
   }
 };
 
@@ -82,17 +91,20 @@ export const updatePassword = async (req, res, next) => {
 export const updateProfileImage = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    const { imageUrl } = req.body;
 
     const user = await User.findById(userId);
     if (!user) return next(createError(404, "User not found"));
 
+    if (!req.file) return next(createError(400, "No file uploaded"));
+
+    const imageUrl = await uploadImage(req.file); // Upload function must return a valid URL
     user.img = imageUrl;
+    user.markModified("img"); // Ensure image is recognized as modified
     await user.save();
 
-    res.status(200).json({ message: "Profile image updated successfully" });
-  } catch (err) {
-    next(err);
+    res.status(200).json({ message: "Profile image updated successfully", imageUrl });
+  } catch (error) {
+    next(createError(500, error.message));
   }
 };
 
@@ -100,18 +112,28 @@ export const updateProfileImage = async (req, res, next) => {
 export const updatePersonalDetails = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    const { name, email } = req.body;
+    const updates = req.body; // Only update provided fields
 
     const user = await User.findById(userId);
     if (!user) return next(createError(404, "User not found"));
 
-    user.name = name || user.name;
-    user.email = email || user.email;
-    await user.save();
+    // Check for email uniqueness only if email is being updated
+    if (updates.email) {
+      const emailExists = await User.findOne({ email: updates.email });
+      if (emailExists && emailExists._id.toString() !== userId) {
+        return next(createError(409, "Email is already in use"));
+      }
+    }
 
+    // Update only the provided fields
+    Object.keys(updates).forEach((key) => {
+      user[key] = updates[key];
+    });
+
+    await user.save();
     res.status(200).json({ message: "Personal details updated successfully" });
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(createError(500, error.message));
   }
 };
 
