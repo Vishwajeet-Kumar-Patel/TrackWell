@@ -7,9 +7,14 @@ import SignUp from "../components/SignUp";
 
 const Container = styled.div`
   flex: 1;
-  height: 100%;
+  height: 65vh;
   display: flex;
+  border-color: black;
+  margin: 20px;
   background: ${({ theme }) => theme.bg};
+  border: 1px solid ${({ theme }) => theme.border};
+  border-radius: 50px; /* Rounded corners */
+  box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.4); /* Box shadow */
   @media (max-width: 700px) {
     flex-direction: column;
   }
@@ -34,6 +39,7 @@ const Image = styled.img`
   height: 100%;
   width: 100%;
   object-fit: cover;
+  border-radius: 50px 0 0 50px;
 `;
 
 const Right = styled.div`
@@ -44,7 +50,6 @@ const Right = styled.div`
   padding: 40px;
   gap: 16px;
   align-items: center;
-  justify-content: center;
 `;
 
 const Text = styled.div`

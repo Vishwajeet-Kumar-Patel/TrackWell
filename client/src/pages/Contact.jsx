@@ -122,28 +122,28 @@ const Contact = () => {
         <InfoContainer>
           <InfoItem>
             📍 <strong>Address:</strong> 123 Fitness Avenue, TrackWell City,
-            Wellness State, 56789
+            Varanasi, 56789
           </InfoItem>
           <InfoItem>
-            📞 <strong>Phone:</strong> +1 234 567 8900
+            📞 <strong>Phone:</strong> +91 9569121326
           </InfoItem>
           <InfoItem>
             ✉️ <strong>Email:</strong>{" "}
-            <a href="mailto:support@trackwell.com">support@trackwell.com</a>
+            <a href="mailto:vishwajeetkumarpatelmgs@gmail.com">vishwajeetkumarpatelmgs@gmail.com</a>
           </InfoItem>
         </InfoContainer>
         <SocialLinks>
           <SocialIcon href="https://facebook.com/trackwell" target="_blank">
             <FaFacebook />
           </SocialIcon>
-          <SocialIcon href="https://twitter.com/trackwell" target="_blank">
+          <SocialIcon href="https://twitter.com/the_dead_vibe" target="_blank">
             <FaTwitter />
           </SocialIcon>
-          <SocialIcon href="https://instagram.com/trackwell" target="_blank">
+          <SocialIcon href="https://instagram.com/vishwajeet_kumar_patel" target="_blank">
             <FaInstagram />
           </SocialIcon>
           <SocialIcon
-            href="https://linkedin.com/company/trackwell"
+            href="https://www.linkedin.com/in/vishwajeet-kumar-00b817239"
             target="_blank"
           >
             <FaLinkedin />
