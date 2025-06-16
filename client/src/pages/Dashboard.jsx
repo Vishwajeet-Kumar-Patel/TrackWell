@@ -77,11 +77,10 @@ const Dashboard = () => {
   const [todaysWorkouts, setTodaysWorkouts] = useState([]);
 
   const [workout, setWorkout] = useState(`#Category
--Workout Name
--Sets
--Reps
--Weight
--Duration`);
+ Workout Name
+ sets reps
+ Weight
+ Duration`);
 
   const dashboardData = async () => {
     setLoading(true);
@@ -126,15 +125,15 @@ const Dashboard = () => {
 
     console.log("📤 Workout string to send:", workoutInput);
 
-    // Send the workout string to the backend
-    await addWorkout(token, { workoutString: workoutInput });
+    // ✅ Send the workout string directly (not wrapped in an object)
+    await addWorkout(token, workoutInput);
 
     // Refresh dashboard data
     await dashboardData();
     await getTodaysWorkout();
 
     alert("✅ Workout added successfully!");
-    setWorkout(""); // clear input if needed
+    setWorkout(""); // clear input field
   } catch (error) {
     console.error("❌ Error adding new workout:", error.message);
     alert("Error adding new workout: " + error.message);
@@ -142,6 +141,7 @@ const Dashboard = () => {
     setButtonLoading(false);
   }
 };
+
   const handleDeleteWorkout = async (workoutId) => {
     const token = localStorage.getItem("fittrack-app-token");
     try {

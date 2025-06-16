@@ -47,16 +47,16 @@ export const getWorkouts = async (date) => {
   return response.data;
 };
 
-export const addWorkout = async (token, body) => {
+export const addWorkout = async (token, workoutString) => {
   try {
-    const res = await API.post("/workout", body, {
+    const res = await API.post("/workout", { workoutString }, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
     return res.data;
   } catch (error) {
-    console.error("❌ Error during addWorkout:", error);
+    console.error("❌ Error during addWorkout:", error.response?.data || error.message);
     throw error;
   }
 };

@@ -38,8 +38,7 @@ const AddWorkout = ({ workout, setWorkout, addNewWorkout, buttonLoading }) => {
 
 #Category
 -Workout Name
--Sets
--Reps
+-Sets Reps
 -Weight
 -Duration`}
         value={workout}
