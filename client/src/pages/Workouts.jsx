@@ -8,6 +8,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { ThemeContext } from "../utils/ThemeContext";
 import dayjs from "dayjs";
 
+// Styled Components
 const Container = styled.div`
   flex: 1;
   height: 100%;
@@ -98,7 +99,7 @@ const Workouts = () => {
     }
   }, [date]);
 
-  // Fetch all workouts to determine highlighted dates
+  // Fetch all workout dates for calendar highlighting
   const getHighlightedDates = useCallback(async () => {
     const token = localStorage.getItem("fittrack-app-token");
     try {
@@ -106,10 +107,10 @@ const Workouts = () => {
       const workoutDates = res?.workouts?.map((workout) =>
         dayjs(workout.date).format("YYYY-MM-DD")
       );
-      setHighlightedDates([...new Set(workoutDates)] || []); // Ensure unique dates
+      setHighlightedDates([...new Set(workoutDates)] || []);
     } catch (error) {
-      console.error("Error fetching workouts:", error);
-      alert("Error fetching workouts: " + error.message);
+      console.error("Error fetching highlighted dates:", error);
+      alert("Error fetching highlighted dates: " + error.message);
     }
   }, []);
 
@@ -118,8 +119,8 @@ const Workouts = () => {
     const token = localStorage.getItem("fittrack-app-token");
     try {
       await deleteWorkout(token, workoutId);
-      getTodaysWorkout(); // Refresh the list after deletion
-      getHighlightedDates(); // Refresh highlighted dates
+      await getTodaysWorkout();
+      await getHighlightedDates();
     } catch (error) {
       console.error("Error deleting workout:", error);
       alert("Error deleting workout: " + error.message);
@@ -161,9 +162,6 @@ const Workouts = () => {
                 ".MuiPickersDay-root.Mui-disabled": {
                   color: theme.text_secondary,
                 },
-                ".MuiPickersDay-root.Mui-disabled:hover": {
-                  backgroundColor: "transparent",
-                },
               }}
               renderDay={(day, _value, DayComponentProps) => {
                 const formattedDay = dayjs(day).format("YYYY-MM-DD");
@@ -172,9 +170,7 @@ const Workouts = () => {
                   <DayComponentProps.DayComponent
                     {...DayComponentProps}
                     style={{
-                      backgroundColor: isWorkoutDay
-                        ? theme.primary + "20"
-                        : "transparent",
+                      backgroundColor: isWorkoutDay ? theme.primary + "20" : "transparent",
                       borderRadius: isWorkoutDay ? "50%" : undefined,
                     }}
                   />
@@ -190,7 +186,7 @@ const Workouts = () => {
               <CircularProgress />
             ) : (
               <CardWrapper>
-                {todaysWorkouts && todaysWorkouts.length > 0 ? (
+                {todaysWorkouts.length > 0 ? (
                   todaysWorkouts.map((workout, index) => (
                     <WorkoutCard
                       key={index}
@@ -199,7 +195,7 @@ const Workouts = () => {
                     />
                   ))
                 ) : (
-                  <div>No workouts for today</div>
+                  <div>No workouts for this day</div>
                 )}
               </CardWrapper>
             )}

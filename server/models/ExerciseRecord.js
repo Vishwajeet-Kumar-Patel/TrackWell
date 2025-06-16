@@ -21,4 +21,4 @@ const ExerciseRecordSchema = new mongoose.Schema({
 });
 
 const ExerciseRecord = mongoose.model('ExerciseRecord', ExerciseRecordSchema);
-export default ExerciseRecord;
+export default ExerciseRecord;  

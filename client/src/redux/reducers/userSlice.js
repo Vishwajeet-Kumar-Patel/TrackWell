@@ -5,15 +5,17 @@ const initialState = {
   currentUser: null,
 };
 
-const userSlice = createSlice({
+export const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
     loginSuccess: (state, action) => {
-      state.currentUser = action.payload;
+      state.currentUser = action.payload.user;
+      localStorage.setItem("fittrack-app-token", action.payload.token);
     },
     logout: (state) => {
       state.currentUser = null;
+      localStorage.removeItem("fittrack-app-token");
     },
   },
 });

@@ -1,64 +1,62 @@
+// client/src/api/index.js
+
 import axios from "axios";
 
+// Create Axios instance
 const API = axios.create({
   baseURL: "http://localhost:5000/api",
 });
 
-export const UserSignUp = async (data) => {
+// 🔐 Automatically attach token from Redux store (persisted in localStorage)
+API.interceptors.request.use((config) => {
   try {
-    const response = await API.post("/signup", data);
-    console.log("Signup API Response:", response.data);
-    return response.data;
-  } catch (error) {
-    console.error("Error during UserSignUp:", error.response?.data || error.message);
-    throw error;
+    const persisted = JSON.parse(localStorage.getItem("persist:root"));
+    const user = persisted?.user ? JSON.parse(persisted.user) : null;
+    const token = user?.currentUser?.token;
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch (err) {
+    console.warn("Error parsing persisted user token:", err.message);
   }
+
+  return config;
+});
+
+
+export const UserSignUp = async (data) => {
+  const response = await API.post("/signup", data);
+  return response.data;
 };
 
 export const UserSignIn = async (data) => {
-  try {
-    const response = await API.post("/signin", data);
-    console.log("Signin API Response:", response.data);
-    return response.data;
-  } catch (error) {
-    console.error("Error during UserSignIn:", error.response?.data || error.message);
-    throw error;
-  }
+  const response = await API.post("/signin", data);
+  return response.data;
 };
 
-export const getDashboardDetails = async (token) => {
-  try {
-    const response = await API.get("/dashboard", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error during getDashboardDetails:", error.response?.data || error.message);
-    throw error;
-  }
+export const getDashboardDetails = async () => {
+  const response = await API.get("/dashboard");
+  return response.data;
 };
 
-export const getWorkouts = async (token, date) => {
-  try {
-    const response = await API.get("/workout", {
-      headers: { Authorization: `Bearer ${token}` },
-      params: { date },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error during getWorkouts:", error.response?.data || error.message);
-    throw error;
-  }
+export const getWorkouts = async (date) => {
+  const response = await API.get("/workout", {
+    params: { date },
+  });
+  return response.data;
 };
 
-export const addWorkout = async (token, data) => {
+export const addWorkout = async (token, body) => {
   try {
-    const response = await API.post("/workout", data, {
-      headers: { Authorization: `Bearer ${token}` },
+    const res = await API.post("/workout", body, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
-    return response.data;
+    return res.data;
   } catch (error) {
-    console.error("Error during addWorkout:", error.response?.data || error.message);
+    console.error("❌ Error during addWorkout:", error);
     throw error;
   }
 };
@@ -70,67 +68,34 @@ export const deleteWorkout = async (token, workoutId) => {
     });
     return response.data;
   } catch (error) {
-    console.error("Error during deleteWorkout:", error.response?.data || error.message);
+    console.error("Error deleting workout:", error.response?.data || error.message);
     throw error;
   }
 };
 
-export const updateProfileImage = async (token, userId, formData) => {
-  try {
-    const response = await API.put(`/update-profile-image/${userId}`, formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error updating profile image:", error.response?.data || error.message);
-    throw error;
-  }
+
+export const updateProfileImage = async (userId, formData) => {
+  const response = await API.put(`/update-profile-image/${userId}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
 };
 
-export const updatePassword = async (token, userId, passwords) => {
-  try {
-    const response = await API.put(`/update-password/${userId}`, passwords, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error updating password:", error.response?.data || error.message);
-    throw error;
-  }
+export const updatePassword = async (userId, passwords) => {
+  const response = await API.put(`/update-password/${userId}`, passwords, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
 };
 
-export const updatePersonalDetails = async (token, userId, details) => {
-  try {
-    const response = await API.put(`/update-personal-details/${userId}`, details, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error updating personal details:", error.response?.data || error.message);
-    throw error;
-  }
+export const updatePersonalDetails = async (userId, details) => {
+  const response = await API.put(`/update-personal-details/${userId}`, details, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
 };
 
-// Fetch workout dates
-export const getWorkoutDates = async (token) => {
-  try {
-    const response = await axios.get('/workouts/dates', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching workout dates:", error.response || error.message);
-    throw new Error("Error fetching workout dates: " + error.message);
-  }
+export const getWorkoutDates = async () => {
+  const response = await API.get("/dates");
+  return response.data;
 };

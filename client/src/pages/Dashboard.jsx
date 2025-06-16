@@ -8,6 +8,7 @@ import AddWorkout from "../components/AddWorkout";
 import WorkoutCard from "../components/cards/WorkoutCard";
 import { addWorkout, getDashboardDetails, getWorkouts, deleteWorkout } from "../api";
 
+// Styled Components
 const Container = styled.div`
   flex: 1;
   height: 100%;
@@ -16,6 +17,7 @@ const Container = styled.div`
   padding: 22px 0px;
   overflow-y: scroll;
 `;
+
 const Wrapper = styled.div`
   flex: 1;
   max-width: 1400px;
@@ -26,6 +28,7 @@ const Wrapper = styled.div`
     gap: 12px;
   }
 `;
+
 const Title = styled.div`
   padding: 0px 16px;
   font-size: 30px;
@@ -33,6 +36,7 @@ const Title = styled.div`
   font-weight: 800;
   text-align: center;
 `;
+
 const FlexWrap = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -43,16 +47,17 @@ const FlexWrap = styled.div`
     gap: 12px;
   }
 `;
+
 const Section = styled.div`
   display: flex;
   flex-direction: column;
   padding: 0px 16px;
   gap: 22px;
-  padding: 0px 16px;
   @media (max-width: 600px) {
     gap: 12px;
   }
 `;
+
 const CardWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -64,16 +69,19 @@ const CardWrapper = styled.div`
   }
 `;
 
+// Dashboard Component
 const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(null);
   const [buttonLoading, setButtonLoading] = useState(false);
   const [todaysWorkouts, setTodaysWorkouts] = useState([]);
-  const [workout, setWorkout] = useState(`#Legs
--Back Squat
--5 setsX15 reps
--30 kg
--10 min`);
+
+  const [workout, setWorkout] = useState(`#Category
+-Workout Name
+-Sets
+-Reps
+-Weight
+-Duration`);
 
   const dashboardData = async () => {
     setLoading(true);
@@ -81,7 +89,7 @@ const Dashboard = () => {
     try {
       const res = await getDashboardDetails(token);
       setData(res);
-      console.log(res);
+      console.log("Dashboard data:", res);
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
       alert("Error fetching dashboard data: " + error.message);
@@ -94,9 +102,9 @@ const Dashboard = () => {
     setLoading(true);
     const token = localStorage.getItem("fittrack-app-token");
     try {
-      const res = await getWorkouts(token, "");
+      const res = await getWorkouts(token, ""); // Empty string fetches today's workout
       setTodaysWorkouts(res?.todaysWorkouts || []);
-      console.log(res);
+      console.log("Today's workouts:", res);
     } catch (error) {
       console.error("Error fetching today's workouts:", error);
       alert("Error fetching today's workouts: " + error.message);
@@ -106,24 +114,39 @@ const Dashboard = () => {
   };
 
   const addNewWorkout = async () => {
-    setButtonLoading(true);
-    const token = localStorage.getItem("fittrack-app-token");
-    try {
-      await addWorkout(token, { workoutString: workout });
-      dashboardData();
-      getTodaysWorkout();
-    } catch (error) {
-      alert("Error adding new workout: " + error.message);
-    } finally {
-      setButtonLoading(false);
-    }
-  };
+  setButtonLoading(true);
+  const token = localStorage.getItem("fittrack-app-token");
+  const workoutInput = workout.trim(); // 'workout' is the state holding user input
 
+  try {
+    if (!workoutInput) {
+      alert("Please enter a workout string before submitting.");
+      return;
+    }
+
+    console.log("📤 Workout string to send:", workoutInput);
+
+    // Send the workout string to the backend
+    await addWorkout(token, { workoutString: workoutInput });
+
+    // Refresh dashboard data
+    await dashboardData();
+    await getTodaysWorkout();
+
+    alert("✅ Workout added successfully!");
+    setWorkout(""); // clear input if needed
+  } catch (error) {
+    console.error("❌ Error adding new workout:", error.message);
+    alert("Error adding new workout: " + error.message);
+  } finally {
+    setButtonLoading(false);
+  }
+};
   const handleDeleteWorkout = async (workoutId) => {
     const token = localStorage.getItem("fittrack-app-token");
     try {
       await deleteWorkout(token, workoutId);
-      getTodaysWorkout(); // Refresh the list after deletion
+      await getTodaysWorkout();
     } catch (error) {
       console.error("Error deleting workout:", error);
       alert("Error deleting workout: " + error.message);
@@ -139,12 +162,13 @@ const Dashboard = () => {
     <Container>
       <Wrapper>
         <Title>Dashboard</Title>
+
         <FlexWrap>
           {counts.map((item, index) => (
             <CountsCard key={index} item={item} data={data} />
           ))}
         </FlexWrap>
-        
+
         <FlexWrap>
           <WeeklyStatCard data={data} />
           <CategoryChart data={data} />
@@ -155,8 +179,9 @@ const Dashboard = () => {
             buttonLoading={buttonLoading}
           />
         </FlexWrap>
+
         <Section>
-          <Title>Todays Workouts</Title>
+          <Title>Today's Workouts</Title>
           <CardWrapper>
             {todaysWorkouts.length > 0 ? (
               todaysWorkouts.map((workout, index) => (
