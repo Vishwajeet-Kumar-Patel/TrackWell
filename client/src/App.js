@@ -12,8 +12,7 @@ import Profile from "./pages/Profile";
 import { styled } from "styled-components";
 import { ThemeProvider } from "./utils/ThemeContext";
 import Home from "./pages/Home";
-
-
+import AIChatbot from "./components/AIChatbot"; // ✅ Correct location
 
 const Container = styled.div`
   width: 100%;
@@ -29,6 +28,7 @@ const Container = styled.div`
 
 const App = () => {
   const { currentUser } = useSelector((state) => state.user);
+
   return (
     <ThemeProvider>
       <BrowserRouter>
@@ -36,14 +36,18 @@ const App = () => {
           <Container>
             <Navbar currentUser={currentUser} />
             <Routes>
-              <Route path="/home" exact element={<Home />} />
-              <Route path="/" exact element={<Dashboard />} />
-              <Route path="/workouts" exact element={<Workouts />} />
-              <Route path="/contact" exact element={<Contact />} />
-              <Route path="/tutorials" exact element={<Tutorials />} />
-              <Route path="/blogs" exact element={<Blogs />} />
-              <Route path="/profile" exact element={<Profile />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/workouts" element={<Workouts />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/tutorials" element={<Tutorials />} />
+              <Route path="/blogs" element={<Blogs />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/ai-assistant" element={<AIChatbot />} />
             </Routes>
+
+            {/* ✅ Floating AI Chatbot on All Authenticated Pages */}
+            <AIChatbot />
           </Container>
         ) : (
           <Container>
@@ -54,4 +58,5 @@ const App = () => {
     </ThemeProvider>
   );
 };
+
 export default App;
